@@ -4,7 +4,12 @@ import argparse
 import sys
 
 from promotion_collector.collector import Collector
-from promotion_collector.config import list_city_configs, load_city_config
+from promotion_collector.config import (
+    get_city_group,
+    list_city_configs,
+    list_city_groups,
+    load_city_config,
+)
 from promotion_collector.http_client import HttpClient
 from promotion_collector.sources import OverpassSource, SeedSiteSource, Source
 
@@ -22,13 +27,33 @@ def main(argv: list[str] | None = None) -> int:
             print(slug)
         return 0
 
-    config = load_city_config(args.city)
+    if args.command == "list-groups":
+        for group in list_city_groups():
+            print(group)
+        return 0
+
     http = HttpClient(delay_seconds=args.delay)
     sources = build_sources(args.sources, http, enrich_websites=not args.no_enrich_websites)
-    result = Collector(sources).collect(config, args.limit)
+    collector = Collector(sources)
+
+    if args.command == "collect-group":
+        for city_slug in get_city_group(args.group):
+            config = load_city_config(city_slug)
+            result = collector.collect(config, args.limit)
+            print_collection_result(config.name, result)
+        http.close()
+        return 0
+
+    config = load_city_config(args.city)
+    result = collector.collect(config, args.limit)
     http.close()
 
-    print(f"City: {config.name}")
+    print_collection_result(config.name, result)
+    return 0
+
+
+def print_collection_result(city_name: str, result) -> None:
+    print(f"City: {city_name}")
     print(f"Scanned candidate records: {result.scanned}")
     print(f"New unique records: {result.unique}")
     print(f"JSON: {result.json_path}")
@@ -37,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"New sheet: {result.sheet_name}")
     else:
         print("No XLSX sheet added because there were no new unique records.")
-    return 0
+    print("")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -69,7 +94,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="skip website visits for map results",
     )
 
+    group = subparsers.add_parser("collect-group", help="collect contacts for a city group")
+    group.add_argument("--group", default="russia-million-plus", help="city group name")
+    group.add_argument("--limit", type=int, default=10, help="max unique records to add per city")
+    group.add_argument(
+        "--sources",
+        nargs="+",
+        default=["overpass", "seed"],
+        choices=["overpass", "seed"],
+        help="sources to use",
+    )
+    group.add_argument(
+        "--delay",
+        type=float,
+        default=1.0,
+        help="polite delay between requests to the same domain",
+    )
+    group.add_argument(
+        "--no-enrich-websites",
+        action="store_true",
+        help="skip website visits for map results",
+    )
+
     subparsers.add_parser("list-cities", help="show available city configs")
+    subparsers.add_parser("list-groups", help="show available city groups")
     return parser
 
 

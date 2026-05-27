@@ -1,0 +1,27 @@
+{
+  "slug": "nizhny-novgorod",
+  "name": "Nizhny Novgorod",
+  "country": "Russia",
+  "bbox": [56.1500, 43.7000, 56.4500, 44.2500],
+  "language_keywords": ["а", "е", "и", "о", "у", "ы", "э", "ю", "я", ".ru", "vk.com", "t.me"],
+  "business_type_keywords": {
+    "Ресторан / кафе": ["restaurant", "cafe", "bar", "food", "coffee", "кафе", "ресторан", "бар", "кофе"],
+    "Туризм / гостиницы": ["hotel", "hostel", "tour", "travel", "гостиница", "отель", "хостел", "тур"],
+    "Недвижимость": ["real estate", "property", "rent", "недвиж", "аренда", "квартира"],
+    "Красота / здоровье": ["spa", "salon", "beauty", "massage", "clinic", "салон", "клиника", "массаж", "стомат"],
+    "Образование": ["school", "kindergarten", "language", "школа", "детский сад", "курсы", "образование"],
+    "Авто / ремонт": ["car", "auto", "repair", "авто", "ремонт", "шиномонтаж"],
+    "Сервис / услуги": ["service", "agency", "услуг", "сервис", "агентство"]
+  },
+  "seed_urls": [],
+  "overpass_extra_filters": [
+    {"tag": "website", "pattern": "."},
+    {"tag": "contact:website", "pattern": "."},
+    {"tag": "email", "pattern": "."},
+    {"tag": "contact:email", "pattern": "."},
+    {"tag": "contact:vk", "pattern": "."},
+    {"tag": "contact:telegram", "pattern": "."},
+    {"tag": "contact:instagram", "pattern": "."},
+    {"tag": "contact:facebook", "pattern": "."}
+  ]
+}

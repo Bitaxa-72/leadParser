@@ -10,6 +10,29 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_DIR = PROJECT_ROOT / "config" / "cities"
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
 
+RUSSIA_MILLION_PLUS_CITIES = (
+    "moscow",
+    "saint-petersburg",
+    "novosibirsk",
+    "yekaterinburg",
+    "kazan",
+    "nizhny-novgorod",
+    "chelyabinsk",
+    "krasnoyarsk",
+    "samara",
+    "ufa",
+    "rostov-on-don",
+    "omsk",
+    "krasnodar",
+    "voronezh",
+    "perm",
+    "volgograd",
+)
+
+CITY_GROUPS = {
+    "russia-million-plus": RUSSIA_MILLION_PLUS_CITIES,
+}
+
 
 @dataclass(frozen=True, slots=True)
 class CityConfig:
@@ -67,3 +90,14 @@ def load_city_config(slug: str, config_dir: Path = DEFAULT_CONFIG_DIR) -> CityCo
 
 def list_city_configs(config_dir: Path = DEFAULT_CONFIG_DIR) -> list[str]:
     return sorted(path.stem for path in config_dir.glob("*.json"))
+
+
+def list_city_groups() -> list[str]:
+    return sorted(CITY_GROUPS)
+
+
+def get_city_group(name: str) -> tuple[str, ...]:
+    if name not in CITY_GROUPS:
+        available = ", ".join(list_city_groups())
+        raise KeyError(f"City group '{name}' not found. Available: {available or 'none'}")
+    return CITY_GROUPS[name]

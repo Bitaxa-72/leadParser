@@ -14,6 +14,16 @@ from promotion_collector.sources.base import Source
 
 
 OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter"
+BUSINESS_SELECTOR_TAGS = (
+    "amenity",
+    "shop",
+    "office",
+    "tourism",
+    "craft",
+    "healthcare",
+    "leisure",
+    "club",
+)
 
 
 class OverpassSource(Source):
@@ -24,23 +34,30 @@ class OverpassSource(Source):
         self.enrich_websites = enrich_websites
 
     def collect(self, config: CityConfig, limit: int) -> Iterable[BusinessRecord]:
-        query = build_overpass_query(config)
-        try:
-            payload = self.http.post_form(OVERPASS_ENDPOINT, {"data": query})
-        except httpx.HTTPError:
-            return
-
         count = 0
-        for element in payload.get("elements", []):
-            if not isinstance(element, dict):
+        seen_osm_ids: set[str] = set()
+        result_limit = max(limit * 3, 25)
+        for query in build_overpass_queries(config, result_limit=result_limit):
+            try:
+                payload = self.http.post_form(OVERPASS_ENDPOINT, {"data": query})
+            except httpx.HTTPError:
                 continue
-            record = self._record_from_element(element, config)
-            if record is None:
-                continue
-            yield record
-            count += 1
-            if count >= limit:
-                break
+
+            for element in payload.get("elements", []):
+                if not isinstance(element, dict):
+                    continue
+                osm_key = f"{element.get('type')}:{element.get('id')}"
+                if osm_key in seen_osm_ids:
+                    continue
+                seen_osm_ids.add(osm_key)
+
+                record = self._record_from_element(element, config)
+                if record is None:
+                    continue
+                yield record
+                count += 1
+                if count >= limit:
+                    return
 
     def _record_from_element(
         self, element: dict[str, Any], config: CityConfig
@@ -103,7 +120,16 @@ class OverpassSource(Source):
         )
 
 
-def build_overpass_query(config: CityConfig) -> str:
+def build_overpass_query(config: CityConfig, result_limit: int) -> str:
+    statements = list(build_overpass_statements(config))
+    return _wrap_query(statements, result_limit)
+
+
+def build_overpass_queries(config: CityConfig, result_limit: int) -> list[str]:
+    return [_wrap_query([statement], result_limit) for statement in build_overpass_statements(config)]
+
+
+def build_overpass_statements(config: CityConfig) -> list[str]:
     south, west, north, east = config.bbox
     bbox = f"{south},{west},{north},{east}"
     filters = list(config.overpass_extra_filters)
@@ -111,12 +137,24 @@ def build_overpass_query(config: CityConfig) -> str:
         pattern = "|".join(config.language_keywords)
         filters = [{"tag": "name", "pattern": pattern}]
 
-    statements = [
-        f'nwr["{item["tag"]}"~"{item["pattern"]}",i]({bbox});'
-        for item in filters
-        if item.get("tag") and item.get("pattern")
-    ]
-    return "[out:json][timeout:35];(" + "".join(statements) + ");out center tags;"
+    statements = []
+    for item in filters:
+        tag = item.get("tag")
+        pattern = item.get("pattern")
+        if not tag or not pattern:
+            continue
+        if pattern == ".":
+            statements.extend(
+                f'nwr["{business_tag}"]["{tag}"]({bbox});'
+                for business_tag in BUSINESS_SELECTOR_TAGS
+            )
+        else:
+            statements.append(f'nwr["{tag}"~"{pattern}",i]({bbox});')
+    return statements
+
+
+def _wrap_query(statements: list[str], result_limit: int) -> str:
+    return "[out:json][timeout:35];(" + "".join(statements) + f");out center {result_limit};"
 
 
 def osm_source_url(element: dict[str, Any]) -> str:

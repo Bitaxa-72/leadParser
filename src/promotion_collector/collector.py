@@ -35,7 +35,8 @@ class Collector:
             remaining = limit - len(candidates)
             if remaining <= 0:
                 break
-            for record in source.collect(config, remaining):
+            source_limit = max(remaining * 3, remaining + 50)
+            for record in source.collect(config, source_limit):
                 scanned += 1
                 key = record.dedupe_key()
                 if key in existing_keys or key in seen_this_run:

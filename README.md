@@ -28,6 +28,18 @@ python -m promotion_collector.cli collect --city nha-trang --limit 10
 python -m promotion_collector.cli list-cities
 ```
 
+Посмотреть доступные группы городов:
+
+```powershell
+python -m promotion_collector.cli list-groups
+```
+
+Запустить сбор по всем городам-миллионникам России:
+
+```powershell
+python -m promotion_collector.cli collect-group --group russia-million-plus --limit 50 --sources overpass --no-enrich-websites
+```
+
 Запустить только карты, без захода на сайты:
 
 ```powershell
@@ -40,6 +52,8 @@ python -m promotion_collector.cli collect --city nha-trang --limit 10 --sources 
 
 - `data/nha-trang/records.json` - техническое хранилище всех уже найденных записей.
 - `data/nha-trang/nha-trang_contacts.xlsx` - таблица для ручной работы. Каждая новая итерация создает отдельный лист с датой запуска.
+
+Для других городов путь такой же: `data/<city-slug>/`.
 
 Столбцы XLSX:
 
