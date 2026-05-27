@@ -1,0 +1,28 @@
+[project]
+name = "promotion-collector"
+version = "0.1.0"
+description = "Collect public business contacts for manual outreach, grouped by city."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.12.0",
+  "httpx>=0.27.0",
+  "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.0.0"]
+
+[project.scripts]
+promotion-collector = "promotion_collector.cli:main"
+
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

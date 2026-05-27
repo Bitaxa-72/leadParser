@@ -1,0 +1,41 @@
+{
+  "slug": "nha-trang",
+  "name": "Nha Trang",
+  "country": "Vietnam",
+  "bbox": [12.1700, 109.1200, 12.3600, 109.3300],
+  "language_keywords": [
+    "рус",
+    "russian",
+    "russki",
+    "росс",
+    "снг",
+    "экспат",
+    "expat",
+    "moscow",
+    "москва",
+    "siberia",
+    "сибирь",
+    "borsch",
+    "борщ",
+    "matryoshka",
+    "матрёшка",
+    "matreshka",
+    "banya",
+    "баня"
+  ],
+  "business_type_keywords": {
+    "Ресторан / кафе": ["restaurant", "cafe", "bar", "food", "coffee", "borsch", "борщ", "кафе", "ресторан"],
+    "Туризм / экскурсии": ["tour", "travel", "excursion", "trip", "тур", "экскурс", "travel agency"],
+    "Недвижимость": ["real estate", "property", "rent", "rental", "apartment", "недвиж", "аренда"],
+    "Красота / здоровье": ["spa", "salon", "beauty", "massage", "clinic", "студия", "салон", "массаж"],
+    "Образование / детские услуги": ["school", "kindergarten", "kids", "language", "школа", "дет", "язык"],
+    "Сервис / услуги": ["service", "repair", "agency", "услуг", "ремонт", "сервис"]
+  },
+  "seed_urls": [],
+  "overpass_extra_filters": [
+    {"tag": "cuisine", "pattern": "russian"},
+    {"tag": "name", "pattern": "russian|рус|росс|moscow|москва|siberia|сибирь|borsch|борщ|matryoshka|matreshka|banya|баня"},
+    {"tag": "website", "pattern": "\\.ru|vk\\.com|t\\.me"},
+    {"tag": "contact:website", "pattern": "\\.ru|vk\\.com|t\\.me"}
+  ]
+}
